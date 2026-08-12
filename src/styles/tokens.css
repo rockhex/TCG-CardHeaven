@@ -1,0 +1,107 @@
+/* Design tokens for Ethereal Archive - generated from user's design.md */
+:root{
+  /* Base colors */
+  --color-base-100: #fdf8f8;
+  --color-base-200: #f7f3f2;
+  --color-base-300: #f1edec;
+  --color-base-content: #1c1b1b;
+
+  /* Brand */
+  --color-primary: #1A1A1A;
+  --color-primary-content: #FFFFFF;
+
+  --color-secondary: #FED65B; /* Oro */
+  --color-secondary-content: #000000;
+
+  --color-accent: #C0C0C0; /* Plata */
+  --color-accent-content: #000000;
+
+  --color-neutral: #797676;
+  --color-neutral-content: #FFFFFF;
+
+  --color-info: #21005D;
+  --color-info-content: #FFFFFF;
+
+  --color-success: #1f6d3d;
+  --color-success-content: #FFFFFF;
+
+  --color-error: #ba1a1a;
+  --color-error-content: #000000;
+
+  /* Surface containers */
+  --color-surface: var(--color-base-100);
+  --color-surface-dim: #ddd9d8;
+  --color-surface-bright: var(--color-base-100);
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: var(--color-base-200);
+  --color-surface-container: var(--color-base-300);
+  --color-surface-container-high: #ebe7e6;
+  --color-surface-container-highest: #e5e2e1;
+
+  /* Outlines and tints */
+  --color-on-surface: #1c1b1b;
+  --color-on-surface-variant: #444748;
+  --color-outline: #747878;
+  --color-outline-variant: #c4c7c7;
+  --color-surface-tint: #5f5e5e;
+
+  /* Typography tokens */
+  --font-family-display: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-family-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-family-label: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+
+  --font-size-display-lg: 48px;
+  --line-height-display-lg: 56px;
+  --font-weight-display-lg: 700;
+  --letter-spacing-display-lg: -0.02em;
+
+  --font-size-display-lg-mobile: 32px;
+  --line-height-display-lg-mobile: 40px;
+  --font-weight-display-lg-mobile: 700;
+  --letter-spacing-display-lg-mobile: -0.01em;
+
+  --font-size-headline-md: 24px;
+  --line-height-headline-md: 32px;
+  --font-weight-headline-md: 600;
+
+  --font-size-headline-sm: 20px;
+  --line-height-headline-sm: 28px;
+  --font-weight-headline-sm: 600;
+
+  --font-size-body-lg: 18px;
+  --line-height-body-lg: 28px;
+  --font-size-body-md: 16px;
+  --line-height-body-md: 24px;
+  --font-size-body-sm: 14px;
+  --line-height-body-sm: 20px;
+
+  --font-size-label-caps: 12px;
+  --line-height-label-caps: 16px;
+  --font-weight-label-caps: 700;
+  --letter-spacing-label-caps: 0.1em;
+
+  /* Spacing */
+  --spacing-base: 8px;
+  --spacing-section-desktop: 80px;
+  --spacing-section-mobile: 40px;
+  --spacing-gutter: 24px;
+  --container-max-width: 1280px;
+
+  /* Radii and borders */
+  --radius-none: 0rem;
+  --border-width: 1px;
+  --border-color: var(--color-primary);
+
+  /* Elevation (minimal) */
+  --shadow-card: 0px 12px 32px rgba(26,26,26,0.06);
+  --shadow-none: none;
+
+  /* Misc */
+  --divider-subtle: #F9F9F9;
+  --divider-strong: #1A1A1A;
+}
+
+/* Utility helpers for tokens usage */
+:root{
+  --site-max-width: var(--container-max-width);
+}
