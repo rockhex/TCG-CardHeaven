@@ -1,0 +1,656 @@
+{
+  "info": {
+    "name": "TCG CardHeaven",
+    "description": "Colección end-to-end: registro con domicilio, login, catálogo, carrito, checkout y endpoints de admin. Las variables (tokens, ids) se guardan automáticamente entre requests via test scripts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "adminEmail", "value": "admin@tcgtrader.com" },
+    { "key": "adminPassword", "value": "admin123" },
+    { "key": "customerEmail", "value": "cust@test.com" },
+    { "key": "customerPassword", "value": "cust123" },
+    { "key": "adminRoleId", "value": "00000000-0000-0000-0000-000000000001" },
+    { "key": "customerRoleId", "value": "00000000-0000-0000-0000-000000000002" },
+    { "key": "adminToken", "value": "" },
+    { "key": "customerToken", "value": "" },
+    { "key": "adminId", "value": "" },
+    { "key": "customerId", "value": "" },
+    { "key": "gameId", "value": "" },
+    { "key": "setId", "value": "" },
+    { "key": "cardId", "value": "" },
+    { "key": "cardItemId", "value": "" },
+    { "key": "deckId", "value": "" },
+    { "key": "deckItemId", "value": "" },
+    { "key": "addressId", "value": "" },
+    { "key": "orderId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Login admin (seeded)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set('adminToken', b.token);",
+                  "pm.collectionVariables.set('adminId', b.userId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register customer (con domicilio inicial)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set('customerToken', b.token);",
+                  "pm.collectionVariables.set('customerId', b.userId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Customer Test\",\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\",\n  \"initialAddress\": {\n    \"street\": \"Calle Falsa 123\",\n    \"city\": \"Buenos Aires\",\n    \"country\": \"AR\",\n    \"zipCode\": \"1000\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Register customer (sin domicilio)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"No Addr\",\n  \"email\": \"noaddr@test.com\",\n  \"password\": \"pw123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set('customerToken', b.token);",
+                  "pm.collectionVariables.set('customerId', b.userId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Games",
+      "item": [
+        {
+          "name": "GET /api/games (público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/games", "host": ["{{baseUrl}}"], "path": ["api", "games"] }
+          }
+        },
+        {
+          "name": "POST /api/games (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('gameId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/games", "host": ["{{baseUrl}}"], "path": ["api", "games"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Pokemon\"\n}" }
+          }
+        },
+        {
+          "name": "GET /api/games/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/games/{{gameId}}", "host": ["{{baseUrl}}"], "path": ["api", "games", "{{gameId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Sets",
+      "item": [
+        {
+          "name": "GET /api/sets (público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/sets", "host": ["{{baseUrl}}"], "path": ["api", "sets"] }
+          }
+        },
+        {
+          "name": "POST /api/sets (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('setId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/sets", "host": ["{{baseUrl}}"], "path": ["api", "sets"] },
+            "body": { "mode": "raw", "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"name\": \"Base Set\",\n  \"code\": \"BS01\"\n}" }
+          }
+        },
+        {
+          "name": "GET /api/sets/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/sets/{{setId}}", "host": ["{{baseUrl}}"], "path": ["api", "sets", "{{setId}}"] }
+          }
+        },
+        {
+          "name": "GET /api/games/{gameId}/sets",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/games/{{gameId}}/sets", "host": ["{{baseUrl}}"], "path": ["api", "games", "{{gameId}}", "sets"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Cards",
+      "item": [
+        {
+          "name": "GET /api/cards (público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/cards", "host": ["{{baseUrl}}"], "path": ["api", "cards"] }
+          }
+        },
+        {
+          "name": "GET /api/cards?search=char",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/cards?search=char",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cards"],
+              "query": [{ "key": "search", "value": "char" }]
+            }
+          }
+        },
+        {
+          "name": "POST /api/cards (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set('cardId', b.id);",
+                  "pm.collectionVariables.set('cardItemId', b.itemId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/cards", "host": ["{{baseUrl}}"], "path": ["api", "cards"] },
+            "body": { "mode": "raw", "raw": "{\n  \"setId\": \"{{setId}}\",\n  \"name\": \"Charizard\",\n  \"rarity\": \"RARE\",\n  \"condition\": \"MINT\",\n  \"price\": 99.99,\n  \"stock\": 10,\n  \"imageUrl\": \"http://img/char.png\"\n}" }
+          }
+        },
+        {
+          "name": "GET /api/cards/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/cards/{{cardId}}", "host": ["{{baseUrl}}"], "path": ["api", "cards", "{{cardId}}"] }
+          }
+        },
+        {
+          "name": "PUT /api/cards/{id} (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/cards/{{cardId}}", "host": ["{{baseUrl}}"], "path": ["api", "cards", "{{cardId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"setId\": \"{{setId}}\",\n  \"name\": \"Charizard V\",\n  \"rarity\": \"RARE\",\n  \"condition\": \"MINT\",\n  \"price\": 120.00,\n  \"stock\": 15,\n  \"imageUrl\": \"http://img/char.png\"\n}" }
+          }
+        },
+        {
+          "name": "DELETE /api/cards/{id} (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/cards/{{cardId}}", "host": ["{{baseUrl}}"], "path": ["api", "cards", "{{cardId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Decks",
+      "item": [
+        {
+          "name": "GET /api/decks (público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/decks", "host": ["{{baseUrl}}"], "path": ["api", "decks"] }
+          }
+        },
+        {
+          "name": "POST /api/decks (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set('deckId', b.id);",
+                  "pm.collectionVariables.set('deckItemId', b.itemId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/decks", "host": ["{{baseUrl}}"], "path": ["api", "decks"] },
+            "body": { "mode": "raw", "raw": "{\n  \"setId\": \"{{setId}}\",\n  \"name\": \"Starter Deck\",\n  \"description\": \"60 card deck\",\n  \"price\": 29.99,\n  \"stock\": 20\n}" }
+          }
+        },
+        {
+          "name": "GET /api/decks/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/decks/{{deckId}}", "host": ["{{baseUrl}}"], "path": ["api", "decks", "{{deckId}}"] }
+          }
+        },
+        {
+          "name": "PUT /api/decks/{id} (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/decks/{{deckId}}", "host": ["{{baseUrl}}"], "path": ["api", "decks", "{{deckId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"setId\": \"{{setId}}\",\n  \"name\": \"Starter Deck v2\",\n  \"description\": \"updated\",\n  \"price\": 35.00,\n  \"stock\": 18\n}" }
+          }
+        },
+        {
+          "name": "DELETE /api/decks/{id} (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/decks/{{deckId}}", "host": ["{{baseUrl}}"], "path": ["api", "decks", "{{deckId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Discounts",
+      "item": [
+        {
+          "name": "POST /api/discounts (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/discounts", "host": ["{{baseUrl}}"], "path": ["api", "discounts"] },
+            "body": { "mode": "raw", "raw": "{\n  \"itemId\": \"{{cardItemId}}\",\n  \"percentage\": 10.0,\n  \"validFrom\": \"2026-01-01T00:00:00Z\",\n  \"validTo\": \"2026-12-31T23:59:59Z\",\n  \"active\": true\n}" }
+          }
+        },
+        {
+          "name": "GET /api/items/{itemId}/discounts",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/items/{{cardItemId}}/discounts", "host": ["{{baseUrl}}"], "path": ["api", "items", "{{cardItemId}}", "discounts"] }
+          }
+        },
+        {
+          "name": "GET /api/items/{itemId}/discounts/active",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/items/{{cardItemId}}/discounts/active", "host": ["{{baseUrl}}"], "path": ["api", "items", "{{cardItemId}}", "discounts", "active"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Addresses",
+      "item": [
+        {
+          "name": "GET /api/users/{userId}/addresses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const arr = pm.response.json();",
+                  "if (Array.isArray(arr) && arr.length > 0) { pm.collectionVariables.set('addressId', arr[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/addresses", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "addresses"] }
+          }
+        },
+        {
+          "name": "POST /api/users/{userId}/addresses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('addressId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/addresses", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "addresses"] },
+            "body": { "mode": "raw", "raw": "{\n  \"street\": \"Av Siempre Viva 742\",\n  \"city\": \"Springfield\",\n  \"country\": \"US\",\n  \"zipCode\": \"12345\"\n}" }
+          }
+        },
+        {
+          "name": "DELETE /api/users/{userId}/addresses/{addressId}",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/addresses/{{addressId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "addresses", "{{addressId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Cart",
+      "item": [
+        {
+          "name": "GET /api/users/{userId}/cart",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/cart", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "cart"] }
+          }
+        },
+        {
+          "name": "POST cart/items (add card)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/cart/items", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "cart", "items"] },
+            "body": { "mode": "raw", "raw": "{\n  \"itemId\": \"{{cardItemId}}\",\n  \"quantity\": 2\n}" }
+          }
+        },
+        {
+          "name": "POST cart/items (add deck)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/cart/items", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "cart", "items"] },
+            "body": { "mode": "raw", "raw": "{\n  \"itemId\": \"{{deckItemId}}\",\n  \"quantity\": 1\n}" }
+          }
+        },
+        {
+          "name": "DELETE cart/items/{itemId}",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/cart/items/{{deckItemId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "cart", "items", "{{deckItemId}}"] }
+          }
+        },
+        {
+          "name": "DELETE /api/users/{userId}/cart (vaciar)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/cart", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "cart"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Checkout / Orders",
+      "item": [
+        {
+          "name": "POST /api/users/{userId}/checkout (pago)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('orderId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/checkout", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "checkout"] },
+            "body": { "mode": "raw", "raw": "{\n  \"addressId\": \"{{addressId}}\",\n  \"paymentProvider\": \"STRIPE\",\n  \"externalProcessorId\": \"pi_test_123\"\n}" }
+          }
+        },
+        {
+          "name": "GET /api/users/{userId}/orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/orders", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "orders"] }
+          }
+        },
+        {
+          "name": "GET /api/orders/{id}",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/orders/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["api", "orders", "{{orderId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Users (admin / self)",
+      "item": [
+        {
+          "name": "GET /api/users/{id} (self)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}"] }
+          }
+        },
+        {
+          "name": "POST /api/users (admin crea)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Sub User\",\n  \"email\": \"sub@test.com\",\n  \"password\": \"pw123\"\n}" }
+          }
+        },
+        {
+          "name": "PATCH /api/users/{id}/role (admin promueve)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}/role", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}", "role"] },
+            "body": { "mode": "raw", "raw": "{\n  \"roleId\": \"{{adminRoleId}}\"\n}" }
+          }
+        },
+        {
+          "name": "DELETE /api/users/{id} (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{customerId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{customerId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Roles (admin)",
+      "item": [
+        {
+          "name": "GET /api/roles",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] }
+          }
+        },
+        {
+          "name": "GET /api/roles/{id}",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/roles/{{adminRoleId}}", "host": ["{{baseUrl}}"], "path": ["api", "roles", "{{adminRoleId}}"] }
+          }
+        },
+        {
+          "name": "POST /api/roles",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ROLE_CUSTOM\",\n  \"description\": \"rol custom\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Admin",
+      "item": [
+        {
+          "name": "GET /api/admin/stock-movements",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stock-movements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "stock-movements"],
+              "query": [
+                { "key": "itemId", "value": "{{cardItemId}}", "disabled": true },
+                { "key": "reason", "value": "SALE", "disabled": true },
+                { "key": "from", "value": "2026-01-01T00:00:00Z", "disabled": true },
+                { "key": "to", "value": "2026-12-31T23:59:59Z", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/admin/orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "orders"],
+              "query": [
+                { "key": "userId", "value": "{{customerId}}", "disabled": true },
+                { "key": "status", "value": "PAID", "disabled": true },
+                { "key": "from", "value": "2026-01-01T00:00:00Z", "disabled": true },
+                { "key": "to", "value": "2026-12-31T23:59:59Z", "disabled": true }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
